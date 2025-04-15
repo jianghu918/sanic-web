@@ -27,6 +27,7 @@
     "url": "https://github.com/pdsuwwz/chatgpt-vue3-light-mvp/issues"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
     "@vueuse/core": "^10.10.0",
     "axios": "1.7.2",
     "dompurify": "^3.1.5",

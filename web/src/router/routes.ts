@@ -31,6 +31,18 @@ const routes: Array<RouteRecordRaw> = [
         name: 'UaDetail',
         component: () => import('@/views/usassistant/UsDetail.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/testAssitant',
+        name: 'TestAssitant',
+        component: () => import('@/views/DemandManager.vue'),
+        meta: { requiresAuth: true } // 标记需要认证
+    },
+    {
+        path: '/mcpChat',
+        name: 'McpChat',
+        component: () => import('@/views/mcp/MCPClient.vue'),
+        meta: { requiresAuth: true } // 标记需要认证
     }
 ]
 
