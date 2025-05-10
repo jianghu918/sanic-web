@@ -67,7 +67,7 @@ export async function login(username, password) {
  * @param limit
  * @returns
  */
-export async function query_user_qa_record(page, limit) {
+export async function query_user_qa_record(page, limit, search_text) {
     const userStore = useUserStore()
     const token = userStore.getUserToken()
     const url = new URL(`${location.origin}/sanic/user/query_user_record`)
@@ -80,7 +80,8 @@ export async function query_user_qa_record(page, limit) {
         },
         body: JSON.stringify({
             page,
-            limit
+            limit,
+            search_text
         })
     })
     return fetch(req)

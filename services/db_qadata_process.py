@@ -296,7 +296,7 @@ async def select_report_by_title(title: str) -> str:
     :param title:
     :return:
     """
-    sql = f"""select markdown from t_report_info where title like '%{title}%' and is_delete=0 order by create_time desc limit 1"""
+    sql = f"""select markdown from t_report_info where title like '%{title}%'  order by create_time desc limit 1"""
     report_dict = MysqlUtil().query_mysql_dict(sql)
     if len(report_dict) > 0:
         return report_dict[0]["markdown"].replace("```markdown", "").replace("```", "")

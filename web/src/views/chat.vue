@@ -28,7 +28,8 @@ onMounted(() => {
         isInit,
         conversationItems,
         tableData,
-        currentRenderIndex
+        currentRenderIndex,
+        ''
     )
 })
 
@@ -45,7 +46,8 @@ function handleModalClose(value) {
         isInit,
         conversationItems,
         tableData,
-        currentRenderIndex
+        currentRenderIndex,
+        ''
     )
 }
 
@@ -472,7 +474,8 @@ const rowProps = (row: any) => {
                     isInit,
                     conversationItems,
                     tableData,
-                    currentRenderIndex
+                    currentRenderIndex,
+                    ''
                 )
             }
 
@@ -482,7 +485,8 @@ const rowProps = (row: any) => {
                         isInit,
                         conversationItems,
                         tableData,
-                        currentRenderIndex
+                        currentRenderIndex,
+                        ''
                     )
                 }
                 //关闭默认页面
@@ -528,7 +532,8 @@ const scrollToItem = (index: number) => {
             isInit,
             conversationItems,
             tableData,
-            currentRenderIndex
+            currentRenderIndex,
+            ''
         )
     }
 
@@ -650,7 +655,6 @@ const hideScrollbar = () => {
 }
 
 const searchText = ref('')
-
 const searchChatRef = useTemplateRef('searchChatRef')
 const isFocusSearchChat = ref(false)
 const onFocusSearchChat = () => {
@@ -661,8 +665,25 @@ const onFocusSearchChat = () => {
 }
 const onBlurSearchChat = () => {
     if (searchText.value) return
-
     isFocusSearchChat.value = false
+}
+
+// 在script部分添加搜索处理函数
+const handleSearch = () => {
+    tableData.value = []
+    fetchConversationHistory(
+        isInit,
+        conversationItems,
+        tableData,
+        currentRenderIndex,
+        searchText.value
+    )
+}
+
+const handleClear = () => {
+    if (!showDefaultPage.value) {
+        newChat()
+    }
 }
 </script>
 <template>
@@ -732,6 +753,9 @@ const onBlurSearchChat = () => {
                             clearable
                             @click="onFocusSearchChat()"
                             @blur="onBlurSearchChat()"
+                            @input="handleSearch()"
+                            @keyup.enter="handleSearch()"
+                            @clear="handleClear()"
                             :class="{
                                 focus: isFocusSearchChat
                             }"
