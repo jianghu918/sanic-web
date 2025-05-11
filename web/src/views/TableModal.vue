@@ -17,7 +17,8 @@ const columns = ref([
     },
     {
         title: '用户问题',
-        key: 'question'
+        key: 'question',
+        ellipsis: true
     },
     {
         title: '创建时间',

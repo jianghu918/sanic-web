@@ -1,6 +1,28 @@
 <template>
     <LayoutCenterPanel>
         <n-layout class="main-layout" style="height: 100vh">
+            <!-- 移动说明区块到 n-layout 外部 -->
+            <div class="note-box">
+                <p>MCP功能说明：</p>
+                <ul>
+                    <li>
+                        目前该功能只做了简单的客户端对接示例;
+                        下一版本对接qwen3mcp能力实现多工具协调调用
+                    </li>
+                    <li>
+                        第一步 申请高德API-KEY 并启动高德 MCP Server，命令如下：
+                    </li>
+                    <li>
+                        npx -y supergateway --stdio
+                        "AMAP_MAPS_API_KEY=高德API-KEY npx -y
+                        @amap/amap-maps-mcp-server" --cors
+                    </li>
+                    <li>
+                        通过 maps_weather 工具查询实时天气,输出城市名称如:杭州
+                    </li>
+                </ul>
+            </div>
+
             <div class="mcp-client">
                 <h1>MCP Client</h1>
                 <p>Connection Status: {{ connectionStatus }}</p>
@@ -71,9 +93,9 @@ onMounted(async () => {
 
 const sendMessage = async () => {
     const result = await client.callTool({
-        name: 'get_weather',
+        name: 'maps_weather',
         arguments: {
-            location: message.value
+            city: message.value
         }
     })
     messages.value = JSON.stringify(result.content)
@@ -96,6 +118,24 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
+/* 全局样式 */
+.note-box {
+    max-width: 600px;
+    margin: 20px auto 0;
+    background: #f8f9fa;
+    border-left: 4px solid #3b82f6;
+    border-radius: 4px;
+    padding: 15px;
+}
+.note-box ul {
+    margin: 10px 0 0 20px;
+}
+.note-box li {
+    list-style-type: disc;
+    margin: 5px 0;
+}
+
+/* 保持原有 scoped 样式 */
 .mcp-client {
     font-family: Arial, sans-serif;
     max-width: 600px;
@@ -103,7 +143,7 @@ const sendMessage = async () => {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    margin-top: 200px;
+    margin-top: 20px;
 }
 
 .message-log {
