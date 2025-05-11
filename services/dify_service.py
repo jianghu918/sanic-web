@@ -119,7 +119,6 @@ class DiFyRequest:
                                             if data_type == DataTypeEnum.ANSWER.value[0]:
                                                 await self.send_message(
                                                     res,
-                                                    answer,
                                                     {"data": {"messageType": "begin"}, "dataType": data_type},
                                                 )
                                         elif event_list[1] == "1":
@@ -128,7 +127,6 @@ class DiFyRequest:
                                             if data_type == DataTypeEnum.ANSWER.value[0]:
                                                 await self.send_message(
                                                     res,
-                                                    answer,
                                                     {"data": {"messageType": "end"}, "dataType": data_type},
                                                 )
 
@@ -137,7 +135,6 @@ class DiFyRequest:
                                                 res_data = process(json.loads(bus_data)["data"])
                                                 await self.send_message(
                                                     res,
-                                                    answer,
                                                     {"data": res_data, "dataType": data_type},
                                                 )
                                                 t04_answer_data = {"data": res_data, "dataType": data_type}
@@ -149,7 +146,6 @@ class DiFyRequest:
                                         if data_type == DataTypeEnum.ANSWER.value[0]:
                                             await self.send_message(
                                                 res,
-                                                answer,
                                                 {"data": {"messageType": "continue", "content": answer}, "dataType": data_type},
                                             )
 
@@ -180,7 +176,6 @@ class DiFyRequest:
                                         "data": {"messageType": "continue", "content": "".join(t02_answer_data)},
                                         "dataType": DataTypeEnum.ANSWER.value[0],
                                     }
-                                    print(t02_message_json)
 
                                     if t02_message_json:
                                         await self._save_message(t02_message_json, qa_context, conversation_id, message_id, task_id, qa_type)
@@ -196,17 +191,6 @@ class DiFyRequest:
             return {"error": str(e)}  # 返回错误信息作为字典
         finally:
             await self.res_end(res)
-
-    @staticmethod
-    async def handle_think_tag(answer):
-        """
-        处理<think>标签内的内容
-        :param answer
-        """
-        think_content = re.search(r"<think>(.*?)</think>", answer, re.DOTALL).group(1)
-        remaining_content = re.sub(r"<think>.*?</think>", "", answer, flags=re.DOTALL).strip()
-
-        return think_content, remaining_content
 
     @staticmethod
     async def _save_message(message, qa_context, conversation_id, message_id, task_id, qa_type):
@@ -230,22 +214,12 @@ class DiFyRequest:
                 qa_context.token, conversation_id, message_id, task_id, qa_context.chat_id, qa_context.question, "", message, qa_type
             )
 
-    async def send_message(self, response, answer, message):
+    @staticmethod
+    async def send_message(response, message):
         """
         SSE 格式发送数据，每一行以 data: 开头
-        """
-        if answer.lstrip().startswith("<think>"):
-            # 处理deepseek模型思考过程样式
-            think_content, remaining_content = await self.handle_think_tag(answer)
-
-            # 发送<think>标签内的内容
-            message = {
-                "data": {"messageType": "continue", "content": "> " + think_content.replace("\n", "") + "\n\n" + remaining_content},
-                "dataType": "t02",
-            }
-            await response.write("data:" + json.dumps(message, ensure_ascii=False) + "\n\n")
-        else:
-            await response.write("data:" + json.dumps(message, ensure_ascii=False) + "\n\n")
+        #"""
+        await response.write("data:" + json.dumps(message, ensure_ascii=False) + "\n\n")
 
     @staticmethod
     async def res_begin(res, chat_id):

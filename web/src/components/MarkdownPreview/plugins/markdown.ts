@@ -10,6 +10,13 @@ const md = new MarkdownIt({
     typographer: true
 })
 
+// Customize the image rendering rule
+md.renderer.rules.image = function (tokens, idx, options, env, self) {
+    const token = tokens[idx]
+    token.attrPush(['referrerpolicy', 'no-referrer'])
+    return self.renderToken(tokens, idx, options)
+}
+
 md.use(markdownItHighlight, {
     hljs
 }).use(preWrapperPlugin, {

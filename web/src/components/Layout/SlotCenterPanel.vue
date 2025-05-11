@@ -22,6 +22,10 @@ const handleClickChat = (index) => {
     router.push('/chat')
 }
 
+const handleClick = () => {
+    router.push('/mcpChat')
+}
+
 // 使用ref定义响应式的selectedIndex
 const selectedIndex = ref(0)
 onMounted(() => {
@@ -193,6 +197,7 @@ onMounted(() => {
                             <div
                                 class="icon-button"
                                 style="margin-bottom: 10px"
+                                @click="handleClick()"
                             >
                                 <n-icon size="25" class="icon">
                                     <svg

@@ -166,7 +166,7 @@ async def delete_user_record(user_id, record_ids):
     mysql_client.update_params(sql=sql, params=params)
 
 
-async def query_user_record(user_id, page, limit):
+async def query_user_record(user_id, page, limit, search_text):
     """
     根据用户id查询用户问答记录
     :param page
@@ -174,14 +174,25 @@ async def query_user_record(user_id, page, limit):
     :param user_id
     :return:
     """
-    sql = f"""select count(1) as count from t_user_qa_record  where user_id={user_id}"""
-    total_count = mysql_client.query_mysql_dict(sql)[0]["count"]
+    conditions = []
+    if search_text:
+        conditions.append(f"question LIKE '%{search_text}%'")
+    elif user_id:
+        conditions.append(f"user_id = {user_id}")
+
+    count_sql = "select count(1) as count from t_user_qa_record"
+    if conditions:
+        count_sql += " where " + " and ".join(conditions)
+    total_count = mysql_client.query_mysql_dict(count_sql)[0]["count"]
     total_pages = (total_count + limit - 1) // limit  # 计算总页数
 
     # 计算偏移量
     offset = (page - 1) * limit
-    sql = f"""select * from t_user_qa_record where user_id={user_id} order by id desc LIMIT {limit} OFFSET {offset}"""
-    records = mysql_client.query_mysql_dict(sql)
+    records_sql = f"""select * from t_user_qa_record"""
+    if conditions:
+        records_sql += " where " + " and ".join(conditions)
+    records_sql += " order by id desc LIMIT {limit} OFFSET {offset}".format(limit=limit, offset=offset)
+    records = mysql_client.query_mysql_dict(records_sql)
 
     return {"records": records, "current_page": page, "total_pages": total_pages, "total_count": total_count}
 
