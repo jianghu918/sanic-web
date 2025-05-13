@@ -65,7 +65,10 @@ const messages = ref('')
 const connectionStatus = ref('Disconnected')
 //https://github.com/modelcontextprotocol/typescript-sdk
 // StdioClientTransport
-const transport = new SSEClientTransport(new URL('http://localhost:8000/sse'))
+// 如果是本地开发，需要使用 localhost 来访问宿主机的mcp服务
+const transport = new SSEClientTransport(
+    new URL('http://host.docker.internal:8000/sse')
+)
 
 const client = new Client(
     {
