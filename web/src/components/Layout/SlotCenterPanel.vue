@@ -6,34 +6,15 @@ withDefaults(defineProps<Props>(), {
   loading: false,
 })
 
-const userStore = useUserStore()
 const router = useRouter()
-const logout = () => {
-  userStore.logout()
-  setTimeout(() => {
-    router.push('/login')
-  }, 500)
-}
-const handleClickEfficiency = (index) => {
-  router.push('/testAssitant')
-}
+const userStore = useUserStore()
+const appStore = useAppStore()
 
-const handleClickChat = (index) => {
-  router.push('/chat')
-}
-
-const handleClick = () => {
-  router.push('/mcpChat')
-}
-
-// 使用ref定义响应式的selectedIndex
-const selectedIndex = ref(0)
-onMounted(() => {
-  // 初始化selectedIndex为0
-  router.currentRoute.value.path === '/testAssitant'
-    ? (selectedIndex.value = 2)
-    : (selectedIndex.value = 1)
-})
+appStore.areaLoading = true
+// 主页面加载提示
+setTimeout(() => {
+  appStore.areaLoading = false
+}, 400)
 </script>
 
 <template>
@@ -49,7 +30,7 @@ onMounted(() => {
           w-full
           h-full
           content-class="w-full h-full flex"
-          :show="false"
+          :show="appStore.areaLoading"
           :rotate="false"
           class="bg-#ffffff"
           :style="{

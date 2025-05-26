@@ -3,8 +3,6 @@ import { marked } from 'marked' // 引入 marked 库
 import { NLayout, NLayoutContent, NLayoutHeader } from 'naive-ui'
 import * as GlobalAPI from '@/api'
 
-const loading = ref(true)
-
 const router = useRouter()
 
 // 文件上传
@@ -151,7 +149,6 @@ const query_demand_records = async () => {
   const json = await res.json()
   if (json?.data !== undefined) {
     items.value = json.data.records
-    loading.value = false
   } else {
     items.value = []
   }

@@ -73,11 +73,6 @@ const currentChatId = computed(() => {
   return route.params.chatId
 })
 
-// 主页面加载提示
-const loading = ref(true)
-setTimeout(() => {
-  loading.value = false
-})
 
 // 对话等待提示词图标
 const stylizingLoading = ref(false)

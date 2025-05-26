@@ -93,6 +93,7 @@ export default defineConfig(({ mode }) => {
           './src/hooks',
           './src/store/business',
           './src/store/transform',
+          './src/store/hooks/**',
         ],
         dts: './auto-imports.d.ts',
         eslintrc: {
