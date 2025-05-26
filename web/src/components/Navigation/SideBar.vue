@@ -72,7 +72,7 @@ const SideBarItem = defineComponent({
       <div
         flex="~ col gap-10 items-center"
         class={[
-          'transition-all-260',
+          'select-none transition-all-260',
           this.disabled
             ? 'cursor-not-allowed'
             : 'cursor-pointer',
