@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-
-
     "target": "esnext",
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
@@ -12,10 +10,6 @@
     "baseUrl": "./",
     "module": "esnext",
     "moduleResolution": "node",
-    "noImplicitAny": false,
-    "declaration": false,
-    "removeComments": true,
-    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": [
         "src/*"
@@ -28,9 +22,13 @@
       "naive-ui/volar"
     ],
     "strict": true,
+    "noImplicitAny": false,
+    "declaration": false,
+    "removeComments": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
   "include": [
@@ -40,6 +38,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "__tests__/**/*.ts",
+    "./eslint.config.ts",
     "./auto-imports.d.ts",
     "./components.d.ts",
     "./components-instance.d.ts"

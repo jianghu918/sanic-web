@@ -7,13 +7,9 @@ const routes: Array<RouteRecordRaw> = [
     redirect: {
       name: 'ChatRoot',
     },
+    component: () => import('@/components/Layout/SlotCenterPanel.vue'),
     meta: { requiresAuth: true }, // 标记需要认证
-  },
-  ...childRoutes,
-  {
-    path: '/:pathMatch(.*)',
-    name: '404',
-    component: () => import('@/components/404.vue'),
+    children: childRoutes,
   },
   {
     path: '/login',
@@ -21,28 +17,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Login.vue'),
   },
   {
-    path: '/testAssitant',
-    name: 'TestAssitant',
-    component: () => import('@/views/DemandManager.vue'),
-    meta: { requiresAuth: true }, // 标记需要认证
-  },
-  {
-    path: '/uaDetail/:id',
-    name: 'UaDetail',
-    component: () => import('@/views/usassistant/UsDetail.vue'),
-    meta: { requiresAuth: true },
-  },
-  // {
-  //     path: '/testAssitant',
-  //     name: 'TestAssitant',
-  //     component: () => import('@/views/TestAssistant.vue'),
-  //     meta: { requiresAuth: true } // 标记需要认证
-  // },
-  {
-    path: '/mcpChat',
-    name: 'McpChat',
-    component: () => import('@/views/mcp/MCPClient.vue'),
-    meta: { requiresAuth: true }, // 标记需要认证
+    path: '/:pathMatch(.*)',
+    name: '404',
+    component: () => import('@/components/404.vue'),
   },
 ]
 
