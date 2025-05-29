@@ -1,3 +1,5 @@
+import path from 'node:path'
+import { FileSystemIconLoader } from '@iconify/utils/lib/loader/node-loaders'
 import presetRemToPx from '@unocss/preset-rem-to-px'
 
 import {
@@ -5,7 +7,7 @@ import {
   presetAttributify,
   presetIcons,
   presetWind3,
-  toEscapedSelector,
+  transformerAttributifyJsx,
   transformerDirectives,
 } from 'unocss'
 
@@ -14,13 +16,25 @@ export default defineConfig({
   presets: [
     presetWind3(),
     presetAttributify(),
-    presetIcons(),
+    presetIcons({
+      customizations: {
+        transform(svg) {
+          return svg.replace(/#fff/, 'currentColor')
+        },
+      },
+      collections: {
+        'my-svg': FileSystemIconLoader(
+          path.join(__dirname, 'src/assets/svg'),
+        ),
+      },
+    }),
     presetRemToPx({
       baseFontSize: 4,
     }),
   ],
   transformers: [
     transformerDirectives(),
+    transformerAttributifyJsx(),
   ],
   theme: {
     colors: {
@@ -36,29 +50,6 @@ export default defineConfig({
     [
       'navbar-shadow', {
         'box-shadow': '0 1px 4px rgb(0 21 41 / 8%)',
-      },
-    ],
-    [
-      /^wrapper-dialog-(.+)$/,
-      ([, name], { rawSelector, theme }) => {
-        const themeColor = (theme as any).colors
-        const selector = toEscapedSelector(rawSelector)
-        return `
-          ${selector} {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            overflow: hidden;
-          }
-          ${selector} .n-dialog__title {
-            padding: var(--n-padding);
-          }
-          ${selector} .n-dialog__content {
-            display: flex;
-            flex: 1;
-            min-height: 0;
-          }
-      `
       },
     ],
   ],

@@ -3,8 +3,6 @@ import { marked } from 'marked' // 引入 marked 库
 import { NLayout, NLayoutContent, NLayoutHeader } from 'naive-ui'
 import * as GlobalAPI from '@/api'
 
-const loading = ref(true)
-
 const router = useRouter()
 
 // 文件上传
@@ -151,7 +149,6 @@ const query_demand_records = async () => {
   const json = await res.json()
   if (json?.data !== undefined) {
     items.value = json.data.records
-    loading.value = false
   } else {
     items.value = []
   }
@@ -167,125 +164,123 @@ function navigateToDetail(id) {
 </script>
 
 <template>
-  <LayoutCenterPanel :loading="loading">
-    <n-layout
-      class="h-99% rounded-10 mb-10 mr-2"
-    >
-      <n-layout-header class="header">
-        <div class="header-content">
-          <!-- 这里可以放置一些顶部的内容或导航 -->
-        </div>
-        <button class="create-project-btn" @click="showModal = true">
-          + 创建项目
-        </button>
-      </n-layout-header>
-      <n-layout-content>
-        <div class="container">
-          <div
-            v-for="(item, index) in items"
-            :key="index"
-            class="card"
-            @click="navigateToDetail(item.id)"
-          >
-            <div class="card-header">
-              <n-icon style="margin-right: 5px" size="18">
-                <div class="i-formkit:filedoc"></div>
-              </n-icon>
-              <span class="card-title">需求</span>
-            </div>
-            <div class="card-body">
-              <p>{{ item.doc_desc }}</p>
-            </div>
-            <div class="card-footer">
-              <span class="card-info">功能点: {{ item.fun_num }}</span>
-              <span class="card-date">{{
-                item.update_time
-              }}</span>
-              <!-- 使用 n-dropdown 组件替换原有的按钮 -->
-              <n-dropdown
-                trigger="click"
-                :options="dropdownOptions"
-                @select="(key) => handleSelect(key, item.id)"
-              >
-                <button class="card-button" @click.stop>
-                  ...
-                </button>
-              </n-dropdown>
-            </div>
+  <n-layout
+    class="h-full"
+  >
+    <n-layout-header class="header">
+      <div class="header-content">
+        <!-- 这里可以放置一些顶部的内容或导航 -->
+      </div>
+      <button class="create-project-btn" @click="showModal = true">
+        + 创建项目
+      </button>
+    </n-layout-header>
+    <n-layout-content>
+      <div class="container">
+        <div
+          v-for="(item, index) in items"
+          :key="index"
+          class="card"
+          @click="navigateToDetail(item.id)"
+        >
+          <div class="card-header">
+            <n-icon style="margin-right: 5px" size="18">
+              <div class="i-formkit:filedoc"></div>
+            </n-icon>
+            <span class="card-title">需求</span>
+          </div>
+          <div class="card-body">
+            <p>{{ item.doc_desc }}</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-info">功能点: {{ item.fun_num }}</span>
+            <span class="card-date">{{
+              item.update_time
+            }}</span>
+            <!-- 使用 n-dropdown 组件替换原有的按钮 -->
+            <n-dropdown
+              trigger="click"
+              :options="dropdownOptions"
+              @select="(key) => handleSelect(key, item.id)"
+            >
+              <button class="card-button" @click.stop>
+                ...
+              </button>
+            </n-dropdown>
           </div>
         </div>
-      </n-layout-content>
-    </n-layout>
-
-    <!-- 模态框 -->
-    <n-modal
-      v-model:show="showModal"
-      preset="dialog"
-      title="创建新项目"
-      style="width: 600px"
-      @close="closeModal"
-    >
-      <n-form :model="projectForm">
-        <n-form-item label="项目名称" required>
-          <n-input
-            v-model:value="projectForm.doc_name"
-            placeholder="请输入项目名称"
-          />
-        </n-form-item>
-        <n-form-item label="项目描述" required>
-          <n-input
-            v-model:value="projectForm.doc_desc"
-            type="textarea"
-            placeholder="请输入项目描述"
-          />
-        </n-form-item>
-        <n-form-item label="项目附件" hidden>
-          <n-input v-model:value="projectForm.file_key" />
-        </n-form-item>
-        <n-upload
-          ref="uploadDocRef"
-          multiple
-          :show-file-list="true"
-          action="sanic/file/upload_file"
-          accept=".doc, .docx"
-          @finish="finish_upload"
-        >
-          <n-button>上传附件</n-button>
-        </n-upload>
-      </n-form>
-      <template #action>
-        <n-button @click="submitProject">提交</n-button>
-        <n-button @click="closeModal">取消</n-button>
-      </template>
-    </n-modal>
-
-    <n-modal
-      v-model:show="showAbModal"
-      :closable="false"
-      preset="dialog"
-      title="抽取功能"
-      :mask-closable="false"
-      style="width: 800px"
-    >
-      <div v-if="progress !== null">
-        <n-progress type="line" :percentage="progress" />
       </div>
-      <div v-else>正在准备...</div>
+    </n-layout-content>
+  </n-layout>
 
-      <!-- 实时显示推送的内容 -->
-      <div ref="realTimeContent" class="real-time-content">
-        <p
-          v-for="(message, index) in messages"
-          :key="index"
-          v-html="marked(message)"
-        ></p>
-      </div>
-      <div
-        class="i-svg-spinners:pulse-2 c-#26244c"
-        style="width: 30px; height: 30px; margin-left: -8px"
-      ></div>
-    </n-modal>
-  </LayoutCenterPanel>
+  <!-- 模态框 -->
+  <n-modal
+    v-model:show="showModal"
+    preset="dialog"
+    title="创建新项目"
+    style="width: 600px"
+    @close="closeModal"
+  >
+    <n-form :model="projectForm">
+      <n-form-item label="项目名称" required>
+        <n-input
+          v-model:value="projectForm.doc_name"
+          placeholder="请输入项目名称"
+        />
+      </n-form-item>
+      <n-form-item label="项目描述" required>
+        <n-input
+          v-model:value="projectForm.doc_desc"
+          type="textarea"
+          placeholder="请输入项目描述"
+        />
+      </n-form-item>
+      <n-form-item label="项目附件" hidden>
+        <n-input v-model:value="projectForm.file_key" />
+      </n-form-item>
+      <n-upload
+        ref="uploadDocRef"
+        multiple
+        :show-file-list="true"
+        action="sanic/file/upload_file"
+        accept=".doc, .docx"
+        @finish="finish_upload"
+      >
+        <n-button>上传附件</n-button>
+      </n-upload>
+    </n-form>
+    <template #action>
+      <n-button @click="submitProject">提交</n-button>
+      <n-button @click="closeModal">取消</n-button>
+    </template>
+  </n-modal>
+
+  <n-modal
+    v-model:show="showAbModal"
+    :closable="false"
+    preset="dialog"
+    title="抽取功能"
+    :mask-closable="false"
+    style="width: 800px"
+  >
+    <div v-if="progress !== null">
+      <n-progress type="line" :percentage="progress" />
+    </div>
+    <div v-else>正在准备...</div>
+
+    <!-- 实时显示推送的内容 -->
+    <div ref="realTimeContent" class="real-time-content">
+      <p
+        v-for="(message, index) in messages"
+        :key="index"
+        v-html="marked(message)"
+      ></p>
+    </div>
+    <div
+      class="i-svg-spinners:pulse-2 c-#26244c"
+      style="width: 30px; height: 30px; margin-left: -8px"
+    ></div>
+  </n-modal>
 </template>
 
 <style scoped>

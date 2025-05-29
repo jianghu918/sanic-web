@@ -23,8 +23,8 @@ defineOptions({
 
 <style lang="scss" scoped>
 .slot-frame-layout-container {
-  --at-apply: h-100dvh;
   --at-apply: flex flex-col;
+  --at-apply: h-full;
   --at-apply: overflow-hidden;
 
   .top,

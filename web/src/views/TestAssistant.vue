@@ -179,7 +179,7 @@ const pdfDocument = ref<RefDocsItem>({
 <script lang="ts"></script>
 
 <template>
-  <LayoutCenterPanel>
+  <div size-full>
     <n-space vertical size="large">
       <n-layout
         has-sider
@@ -353,10 +353,10 @@ const pdfDocument = ref<RefDocsItem>({
     >
       选择文件
     </n-upload>
-  </LayoutCenterPanel>
+  </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .icon-button {
   display: flex;
   align-items: center;
