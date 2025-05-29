@@ -1,4 +1,4 @@
-<script lang="tsx" setup>
+<script lang="ts" setup>
 const hotSearchItems = [
   '① Text2SQL 文本转SQL 数据库查询',
   '② Echart图表增强且数据问答可视化',
