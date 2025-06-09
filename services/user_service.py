@@ -86,8 +86,9 @@ async def get_user_info(request) -> dict:
     return user_info
 
 
-async def add_question_record(user_token, conversation_id, message_id, task_id, chat_id, question, t02_answer, t04_answer, qa_type):
+async def add_question_record(uuid_str, user_token, conversation_id, message_id, task_id, chat_id, question, t02_answer, t04_answer, qa_type):
     """
+    @:param uuid_str: 唯一ID
     @param user_token: 用户token
     @param conversation_id: dify会话ID
     @param message_id: 消息ID
@@ -120,6 +121,7 @@ async def add_question_record(user_token, conversation_id, message_id, task_id, 
             mysql_client.update(sql)
         else:
             insert_params = [
+                uuid_str,
                 user_id,
                 conversation_id,
                 message_id,
@@ -131,8 +133,8 @@ async def add_question_record(user_token, conversation_id, message_id, task_id, 
                 file_key,
             ]
             sql = (
-                f" insert into t_user_qa_record(user_id,conversation_id, message_id, task_id,chat_id,question,to2_answer,qa_type,file_key) "
-                f"values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                f" insert into t_user_qa_record(uuid,user_id,conversation_id, message_id, task_id,chat_id,question,to2_answer,qa_type,file_key) "
+                f"values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
             )
             mysql_client.insert(sql=sql, params=insert_params)
 
@@ -166,15 +168,19 @@ async def delete_user_record(user_id, record_ids):
     mysql_client.update_params(sql=sql, params=params)
 
 
-async def query_user_record(user_id, page, limit, search_text):
+async def query_user_record(user_id, page, limit, search_text, chat_id):
     """
     根据用户id查询用户问答记录
     :param page
     :param limit
     :param user_id
+    :param search_text
+    :param chat_id
     :return:
     """
     conditions = []
+    if chat_id:
+        conditions.append(f"chat_id = '{chat_id}'")
     if search_text:
         conditions.append(f"question LIKE '%{search_text}%'")
     elif user_id:

@@ -42,6 +42,7 @@ export const useBusinessStore = defineStore('business-store', {
      */
     async createAssistantWriterStylized(
       uuid,
+      chat_id,
       writerOid,
       data,
     ): Promise<{
@@ -125,7 +126,7 @@ export const useBusinessStore = defineStore('business-store', {
         }
 
         // 调用后端接口拿大模型结果
-        GlobalAPI.createOllama3Stylized(query_str, this.qa_type, uuid)
+        GlobalAPI.createOllama3Stylized(query_str, this.qa_type, uuid,chat_id)
           .then((res) => resolve(processResponse(res)))
           .catch((err) => {
             console.error('Request failed:', err)

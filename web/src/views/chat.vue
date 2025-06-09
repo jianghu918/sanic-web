@@ -20,15 +20,27 @@ const businessStore = useBusinessStore()
 // 是否是刚登录到系统 批量渲染对话记录
 const isInit = ref(false)
 
+//是否查看历史消息标识
+const isView=ref(false)
+
 // 使用 onMounted 生命周期钩子加载历史对话
-onMounted(() => {
-  fetchConversationHistory(
-    isInit,
-    conversationItems,
-    tableData,
-    currentRenderIndex,
-    '',
-  )
+// 新增：加载历史对话的状态
+const isLoadingHistory = ref(false)
+
+// 使用 onMounted 生命周期钩子加载历史对话
+onBeforeMount(() => {
+  try {
+    // 开始加载历史对话
+    isLoadingHistory.value = true
+    isInit.value = true
+    fetchConversationHistory(isInit, conversationItems, tableData, currentRenderIndex, null, '')
+  } catch (error) {
+    console.error('加载历史对话失败:', error)
+    window.$ModalMessage.error('加载历史对话失败，请重试')
+  } finally {
+    // 加载完成
+    isLoadingHistory.value = false
+  }
 })
 
 // 管理对话
@@ -45,6 +57,7 @@ function handleModalClose(value) {
     conversationItems,
     tableData,
     currentRenderIndex,
+    null,
     '',
   )
 }
@@ -119,7 +132,9 @@ const onCompletedReader = (index: number) => {
   }
 
   // 查询是推荐列表
-  query_dify_suggested()
+  if(isView.value==false){
+    query_dify_suggested()
+  }
 }
 
 // 当前索引位置
@@ -181,8 +196,9 @@ const onBelittleFeedback = async (index: number) => {
 
 // 侧边栏对话历史
 interface TableItem {
-  index: number
+  uuid: string
   key: string
+  chat_id: string
 }
 const tableData = ref<TableItem[]>([])
 const tableRef = ref(null)
@@ -190,6 +206,7 @@ const tableRef = ref(null)
 // 保存对话历史记录
 const conversationItems = ref<
   Array<{
+    uuid: string
     chat_id: string
     qa_type: string
     question: string
@@ -208,24 +225,6 @@ const contentLoadingStates = ref(
   visibleConversationItems.value.map(() => false),
 )
 
-// watch(
-//     currentRenderIndex,
-//     (newValue, oldValue) => {
-//         console.log('currentRenderIndex 新值:', newValue)
-//         console.log('currentRenderIndex 旧值:', oldValue)
-//     },
-//     { immediate: true }
-// )
-
-// watch(
-//     conversationItems,
-//     (newValue, oldValue) => {
-//         console.log('visibleConversationItems 新值:', newValue)
-//         console.log('visibleConversationItems 旧值:', oldValue)
-//     },
-//     { immediate: true }
-// )
-
 // chat_id定义
 const uuids = ref<Record<string, string>>({}) // 改为对象存储不同问答类型的uuid
 
@@ -236,6 +235,9 @@ const handleCreateStylized = async (send_text = '') => {
 
   // 设置初始化数据标识为false
   isInit.value = false
+
+  // 设置查看历史消息标识为false
+  isView.value = false
 
   // 清空推荐列表
   suggested_array.value = []
@@ -270,10 +272,13 @@ const handleCreateStylized = async (send_text = '') => {
     showDefaultPage.value = false
   }
 
+    //自定义id
+  const uuid_str= uuidv4()
   // 加入对话历史用于左边表格渲染
   const newItem = {
-    index: tableData.value.length, // 或者根据你的需求计算新的索引
+    uuid: uuid_str, // 或者根据你的需求计算新的索引
     key: inputTextString.value ? inputTextString.value : send_text,
+    chat_id: uuids.value[qa_type.value],
   }
   // 使用 unshift 方法将新元素添加到数组的最前面
   tableData.value.unshift(newItem)
@@ -289,9 +294,11 @@ const handleCreateStylized = async (send_text = '') => {
     uuids.value[qa_type.value] = uuidv4()
   }
 
+
   if (textContent) {
     // 存储该轮用户对话消息
     conversationItems.value.push({
+      uuid: uuid_str,
       chat_id: uuids.value[qa_type.value],
       qa_type: qa_type.value,
       question: textContent,
@@ -305,7 +312,8 @@ const handleCreateStylized = async (send_text = '') => {
   }
 
   const { error, reader, needLogin }
-        = await businessStore.createAssistantWriterStylized(
+    = await businessStore.createAssistantWriterStylized(
+          uuid_str,
           uuids.value[qa_type.value],
           currentChatId.value,
           {
@@ -333,6 +341,7 @@ const handleCreateStylized = async (send_text = '') => {
     outputTextReader.value = reader
     // 存储该轮AI回复的消息
     conversationItems.value.push({
+      uuid: uuid_str,
       chat_id: uuids.value[qa_type.value],
       qa_type: qa_type.value,
       question: textContent,
@@ -350,12 +359,13 @@ const handleCreateStylized = async (send_text = '') => {
 
 // 滚动到底部
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop
-                = messagesContainer.value.scrollHeight
-    }
-  })
+  if (isView.value == false) {
+     nextTick(() => {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+      }
+    })
+  }
 }
 
 const keys = useMagicKeys()
@@ -462,92 +472,89 @@ const finish_upload = (res) => {
 
 // 下面方法用于左侧对话列表点击 右侧内容滚动
 // 用于存储每个 MarkdownPreview 容器的引用
-const markdownPreviews = ref<Array<HTMLElement | null>>([]) // 初始化为空数组
+// const markdownPreviews = ref<Array<HTMLElement | null>>([]) // 初始化为空数组
+  const markdownPreviews = ref<Map<String, HTMLElement | null>>(new Map())
 
-// 表格行点击事件
+
+  // 表格行点击事件
+const currentIndex = ref<number | null>(null)
 const rowProps = (row: any) => {
   return {
-    onClick: () => {
+    class: [
+      'cursor-pointer select-none',
+      currentIndex.value === row.uuid && '[&_.n-data-table-td]:bg-#d5dcff',
+    ].join(' '),
+    onClick: async() => {
+      currentIndex.value = row.uuid
       suggested_array.value = []
-      // 这里*2 是因为对话渲染成两个
-      if (tableData.value.length * 2 !== conversationItems.value.length) {
-        fetchConversationHistory(
+
+      isInit.value = false
+      isView.value = true
+
+      // 这里根据chat_id 过滤同一轮对话数据
+      fetchConversationHistory(
           isInit,
           conversationItems,
           tableData,
           currentRenderIndex,
-          '',
+          row,
+          ''
         )
-      }
 
-      if (row.index === tableData.value.length - 1) {
-        if (conversationItems.value.length === 0) {
-          fetchConversationHistory(
-            isInit,
-            conversationItems,
-            tableData,
-            currentRenderIndex,
-            '',
-          )
-        }
-        // 关闭默认页面
-        showDefaultPage.value = false
-        scrollToBottom()
-      } else {
-        if (row.index === 0) {
-          scrollToItem(0)
-        } else if (row.index < 2) {
-          scrollToItem(row.index + 1)
-        } else {
-          scrollToItem(row.index + 2)
-        }
-      }
+      //关闭默认页面
+      showDefaultPage.value = false
+
+    //   等待 DOM 更新完成
+      await nextTick()
+    //  滚动到指定位置
+      scrollToItem(row.uuid);
     },
   }
 }
 
+// 递归查找最底层的元素
+const findDeepestElement = (element: HTMLElement): HTMLElement => {
+  if (element.children.length === 0) {
+    return element;
+  }
+  return findDeepestElement(element.lastElementChild as HTMLElement);
+};
+
 // 设置 markdownPreviews 数组中的元素
-const setMarkdownPreview = (index: number, el: any) => {
-  if (el && el instanceof HTMLElement) {
-    // 确保 markdownPreviews 数组的长度与 visibleConversationItems 的长度一致
-    if (index >= markdownPreviews.value.length) {
-      markdownPreviews.value.push(null)
-    }
-    markdownPreviews.value[index] = el
-  } else if (el && el.value && el.value instanceof HTMLElement) {
-    // 处理代理对象的情况
-    if (index >= markdownPreviews.value.length) {
-      markdownPreviews.value.push(null)
-    }
-    markdownPreviews.value[index] = el.value
+const setMarkdownPreview = (uuid: string, role: string, el: any) => {
+  if (role === 'user') {
+    if (el && el instanceof HTMLElement) {
+      // 查找最下面的元素
+      const deepestElement = findDeepestElement(el);
+      markdownPreviews.value.set(uuid, deepestElement)
+    } 
   }
 }
 
-// 滚动到指定位置的方法
-const scrollToItem = (index: number) => {
-  // 判断默认页面是否显示或对话历史是否初始化
-  // (!showDefaultPage.value && !isInit.value) ||
-  if (conversationItems.value.length === 0) {
-    // console.log('fetchConversationHistory')
-    fetchConversationHistory(
-      isInit,
-      conversationItems,
-      tableData,
-      currentRenderIndex,
-      '',
-    )
-  }
+//滚动到指定位置的方法
+const scrollToItem = async (uuid: string) => {
+  // 等待 DOM 更新完成
+  await nextTick();
+  await nextTick();
 
-  // 关闭默认页面
-  showDefaultPage.value = false
-  if (markdownPreviews.value[index]) {
-    markdownPreviews.value[index].scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest',
-    })
-  }
-}
+  const element = markdownPreviews.value.get(uuid);
+
+  if (element && element instanceof HTMLElement) {
+      try {
+        // 强制重排，确保元素位置和尺寸正确
+        console.log('UUID:', uuid);
+        console.log('Element:', element);
+        void element.offsetWidth; 
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest',
+        })
+      } catch (error) {
+        console.error('滚动到指定元素时出错:', error);
+      }
+    }
+};
 
 // 默认选中的对话类型
 const qa_type = ref('COMMON_QA')
@@ -680,6 +687,7 @@ const handleSearch = () => {
     conversationItems,
     tableData,
     currentRenderIndex,
+    null,
     searchText.value,
   )
 }
@@ -784,11 +792,9 @@ const handleClear = () => {
               },
             ]"
             :data="tableData"
+            :loading="isLoadingHistory"
             :row-props="rowProps"
           >
-            <!-- <template #empty>
-                              <div></div>
-                          </template> -->
           </n-data-table>
         </n-layout-content>
       </n-layout>
@@ -863,7 +869,7 @@ const handleClear = () => {
           <div
             v-for="(item, index) in visibleConversationItems"
             :key="index"
-            :ref="(el) => setMarkdownPreview(index, el)"
+            :ref="(el) => setMarkdownPreview(item.uuid,item.role, el)"
             class="mb-4"
           >
             <div v-if="item.role === 'user'">
@@ -933,6 +939,7 @@ const handleClear = () => {
                 :reader="item.reader"
                 :model="defaultLLMTypeName"
                 :isInit="isInit"
+                :isView="isView"
                 :qaType="`${item.qa_type}`"
                 :chart-id="`${index}devID${generateRandomSuffix()}`"
                 :parentScollBottomMethod="scrollToBottom"

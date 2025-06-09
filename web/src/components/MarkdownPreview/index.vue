@@ -34,6 +34,7 @@ const { copy, copyDuration } = useClipText()
 
 interface Props {
   isInit: boolean
+  isView: boolean
   chartId: string
   qaType: string
   reader: ReadableStreamDefaultReader<Uint8Array> | null
@@ -231,7 +232,7 @@ const scrollToBottomIfAtBottom = async () => {
  */
 const runReadBuffer = (readCallback = () => {}, endCallback = () => {}) => {
   if (textBuffer.value.length > 0) {
-    const lengthToExtract = props.isInit ? 1000 : 4
+    const lengthToExtract = props.isInit || props.isView ? 1000 : 5
     const nextChunk = textBuffer.value.substring(0, lengthToExtract)
     displayText.value += nextChunk
     textBuffer.value = textBuffer.value.substring(lengthToExtract)
