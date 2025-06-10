@@ -6,6 +6,7 @@ import { isMockDevelopment } from '@/config'
 import DefaultPage from './DefaultPage.vue'
 import SuggestedView from './SuggestedPage.vue'
 import TableModal from './TableModal.vue'
+import { init } from 'echarts'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,6 +52,7 @@ function openModal() {
 // 模态框关闭
 function handleModalClose(value) {
   isModalOpen.value = value
+  isInit.value = true
   // 重新加载对话记录
   fetchConversationHistory(
     isInit,
