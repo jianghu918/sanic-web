@@ -16,8 +16,8 @@ export async function createOllama3Stylized(text, qa_type, uuid,chat_id) {
   })
 
   // 文件问答传文件url
-  if (text.includes('总结归纳文档的关键信息')) {
-    text = `${businessStore.$state.file_url}|总结归纳文档的关键信息`
+  if (text.includes('表格数据')) {
+    text = `${businessStore.$state.file_url}|${text}`
   } else if (qa_type === 'FILEDATA_QA') {
     // 表格问答默认带上文件url/key
     text = `${businessStore.$state.file_url}|${text}`

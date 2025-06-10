@@ -467,7 +467,8 @@ const finish_upload = (res) => {
       window.$ModalMessage.error(`文件上传失败`)
       return
     }
-    const query_text = `${file_name.value} 总结归纳文档的关键信息`
+    const file_name_without_extension = file_name.value.slice(0, file_name.value.lastIndexOf('.')) || file_name.value;
+    const query_text = '分析'+file_name_without_extension+'表格数据'
     handleCreateStylized(query_text)
   }
 }
