@@ -246,6 +246,9 @@ const handleCreateStylized = async (send_text = '') => {
 
   // 若正在加载，则点击后恢复初始状态
   if (stylizingLoading.value) {
+      // 停止dify 对话
+    // console.log('停止dify 对话', businessStore.$state.task_id)
+    await GlobalAPI.stop_chat(businessStore.$state.task_id, qa_type.value)
     onCompletedReader(conversationItems.value.length - 1)
     return
   }
@@ -787,7 +790,7 @@ const collapsed = useLocalStorage(
               </template>
             </n-input>
           </div>
-          <div flex="1 ~ col" overflow-y-auto>
+          <div flex="1 ~ col" class="scrollable-table-container">
             <n-data-table
               ref="tableRef"
               class="custom-table"
@@ -1419,5 +1422,30 @@ const collapsed = useLocalStorage(
 
 .icon-button:hover {
   border: 1px solid #a48ef4; /* 鼠标悬停时的颜色 */
+}
+
+
+/** 自定义对话历史表格滚动条样式 */
+.scrollable-table-container {
+  overflow-y: hidden; /* 默认隐藏滚动条 */
+  height: 100%; /* 根据实际情况调整高度 */
+}
+
+.scrollable-table-container:hover {
+  overflow-y: auto; /* 鼠标悬停时显示滚动条 */
+}
+
+/* 隐藏滚动条轨道 */
+.scrollable-table-container::-webkit-scrollbar {
+  width: 4px; /* 滚动条宽度 */
+}
+
+.scrollable-table-container::-webkit-scrollbar-track {
+  background: transparent; /* 滚动条轨道背景透明 */
+}
+
+.scrollable-table-container::-webkit-scrollbar-thumb {
+  background-color: #bfbfbf; /* 滚动条颜色 */
+  border-radius: 3px; /* 滚动条圆角 */
 }
 </style>

@@ -209,7 +209,7 @@ def query_user_qa_record(chat_id):
     :param chat_id:
     :return:
     """
-    sql = f"select * from t_user_qa_record where chat_id='{chat_id}'"
+    sql = f"select * from t_user_qa_record where chat_id='{chat_id}' order by id desc limit 1"
     return mysql_client.query_mysql_dict(sql)
 
 

@@ -9,7 +9,8 @@ const connectionStatus = ref('Disconnected')
 // StdioClientTransport
 // 如果是本地开发，需要使用 localhost 来访问宿主机的mcp服务
 const transport = new SSEClientTransport(
-  new URL('http://host.docker.internal:8000/sse'),
+  // new URL('http://host.docker.internal:8000/sse'),
+  new URL('http://localhost:3000/sse/amap'),
 )
 
 const client = new Client(
