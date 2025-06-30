@@ -167,6 +167,7 @@ DROP TABLE IF EXISTS t_user_qa_record;
 CREATE TABLE `t_user_qa_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL COMMENT '用户id',
+  `uuid` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '自定义id',
   `conversation_id` varchar(100) DEFAULT NULL COMMENT 'diy/对话id',
   `message_id` varchar(100) DEFAULT NULL COMMENT 'dify/消息id',
   `task_id` varchar(100) DEFAULT NULL COMMENT 'dify/任务id',

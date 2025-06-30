@@ -70,8 +70,9 @@ const processSingleResponse = (res) => {
 }
 
 interface TableItem {
-  index: number
+  uuid: string
   key: string
+  chat_id: string
 }
 
 // 请求接口查询对话历史记录
@@ -89,16 +90,17 @@ export const fetchConversationHistory = async function fetchConversationHistory(
   >,
   tableData: Ref<TableItem[]>,
   currentRenderIndex: Ref<number>,
+  row,
   searchText: string,
 ) {
   try {
-    // 初始化对话历史记录
-    isInit.value = true
+    // // 初始化对话历史记录
+    // isInit.value = true
 
     // 清空现有的 conversationItems
     conversationItems.value = []
 
-    const res = await GlobalAPI.query_user_qa_record(1, 999999, searchText)
+    const res = await GlobalAPI.query_user_qa_record(1, 999999, searchText,row?.chat_id)
     if (res.status === 401) {
       userStore.logout()
       setTimeout(() => {
@@ -109,11 +111,14 @@ export const fetchConversationHistory = async function fetchConversationHistory(
       if (data && Array.isArray(data.data?.records)) {
         const records = data.data.records
 
-        // 初始化左右对话侧列表数据
-        tableData.value = records.map((chat: any, index: number) => ({
-          index,
-          key: chat.question.trim(),
-        }))
+         // 初始化左右对话侧列表数据
+         if (isInit.value) {
+          tableData.value = records.map((chat: any, index: number) => ({
+            uuid:chat.uuid,
+            key: chat.question.trim(),
+            chat_id: chat.chat_id,
+          }))
+        }
 
         const itemsToAdd: any[] = []
         // 用户问题
@@ -125,18 +130,23 @@ export const fetchConversationHistory = async function fetchConversationHistory(
           let chat_id_str = ''
           // 文件key
           let file_key_str = ''
-          const streamDataArray: StreamData[] = []
-
-                    ;[
+          // 自定义id
+          let uuid_str=''
+          const streamDataArray: StreamData[] = [];
+          [
             'question',
             'to2_answer',
             'to4_answer',
             'qa_type',
             'chat_id',
             'file_key',
+            'uuid'
           ].forEach((key: string) => {
             if (record.hasOwnProperty(key)) {
               switch (key) {
+                case 'uuid':
+                  uuid_str = record[key]
+                  break
                 case 'qa_type':
                   qa_type_str = record[key]
                   break
@@ -191,6 +201,7 @@ export const fetchConversationHistory = async function fetchConversationHistory(
 
             if (error === 0 && reader) {
               itemsToAdd.push({
+                uuid: uuid_str,
                 chat_id: chat_id_str,
                 qa_type: qa_type_str,
                 question: question_str,

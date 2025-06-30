@@ -5,7 +5,8 @@ import * as TransformUtils from '@/components/MarkdownPreview/transform'
 export interface BusinessState {
   writerList: any
   qa_type: any
-  file_url: any
+  file_url: any,
+  task_id: any
 }
 
 export const useBusinessStore = defineStore('business-store', {
@@ -16,6 +17,8 @@ export const useBusinessStore = defineStore('business-store', {
       qa_type: 'COMMON_QA',
       // 全局保存文件问答地址
       file_url: '',
+      // 全局保存dify 任务id
+      task_id: '',
     }
   },
   actions: {
@@ -37,11 +40,18 @@ export const useBusinessStore = defineStore('business-store', {
     clearWriterList() {
       this.writerList = []
     },
+    update_task_id(task_id) {
+      this.task_id = task_id
+    },
+    clear_task_id() {
+      this.task_id = ''
+    },
     /**
      * Event Stream 调用大模型python服务接口
      */
     async createAssistantWriterStylized(
       uuid,
+      chat_id,
       writerOid,
       data,
     ): Promise<{
@@ -70,6 +80,12 @@ export const useBusinessStore = defineStore('business-store', {
                       const jsonChunk = JSON.parse(
                         chunk.split('data:')[1],
                       )
+                      if (jsonChunk.task_id) {
+                        // 调用已有的更新方法来更新 task_id
+                        this.update_task_id(
+                          jsonChunk.task_id,
+                        )
+                      }
                       switch (jsonChunk.dataType) {
                         case 't11':
                           controller.enqueue(
@@ -125,7 +141,7 @@ export const useBusinessStore = defineStore('business-store', {
         }
 
         // 调用后端接口拿大模型结果
-        GlobalAPI.createOllama3Stylized(query_str, this.qa_type, uuid)
+        GlobalAPI.createOllama3Stylized(query_str, this.qa_type, uuid,chat_id)
           .then((res) => resolve(processResponse(res)))
           .catch((err) => {
             console.error('Request failed:', err)

@@ -26,7 +26,7 @@ const pagination = computed(() => ({
 const scrollX = computed(() => {
   if (tableData.value.length > 0) {
     const keys = Object.keys(tableData.value[0])
-    const totalWidth = keys.length * 120 // 每列宽度100px
+    const totalWidth = keys.length * 120 // 每列宽度120px
     return totalWidth
   }
   return 0
@@ -42,13 +42,9 @@ const columns = computed<DataTableColumns>(() => {
     return keys.map((key, index) => ({
       title: key,
       key,
-      width: 100,
-      fixed:
-                index <= 1
-                  ? 'left'
-                  : index > keys.length - 3
-                    ? 'right'
-                    : undefined,
+      width: 120, // 每列宽度调整为 120px
+      // 固定前三个列
+      fixed: index < 3 ? 'left' : undefined,
       render(row: any) {
         return row[key]
       },
@@ -99,21 +95,20 @@ onMounted(() => {
       ></div>
       <n-data-table
         :style="{
-          'height': `550px`,
-          'width': `850px`,
-          'margin': `0 10px`,
+          // 调整高度
+          'height': `auto`, 
+          'width': `98%`,
+          'margin': `0 5px`,
           'background-color': `#fff`,
+          // 确保横向滚动条在需要时显示
+          'overflow-x': 'auto' 
         }"
         :columns="columns"
         :data="pagedTableData"
         :pagination="pagination"
-        :max-height="550"
-        virtual-scroll
-        virtual-scroll-x
-        :scroll-x="scrollX"
+        :scroll-x="scrollX" 
         :min-row-height="minRowHeight"
         :height-for-row="heightForRow"
-        virtual-scroll-header
         :header-height="48"
       />
       <template #footer>

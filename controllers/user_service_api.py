@@ -50,8 +50,9 @@ async def query_user_qa_record(request):
     page = int(request.json.get("page", 1))
     limit = int(request.json.get("limit", 10))
     search_text = request.json.get("search_text")
+    chat_id = request.json.get("chat_id")
     user_info = await get_user_info(request)
-    return await query_user_record(user_info["id"], page, limit, search_text)
+    return await query_user_record(user_info["id"], page, limit, search_text, chat_id)
 
 
 @bp.post("/delete_user_record")

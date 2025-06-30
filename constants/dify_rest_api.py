@@ -15,6 +15,9 @@ class DiFyRestApi:
     # 获取下一轮建议问题列表
     DIFY_REST_SUGGESTED = "/v1/messages/:message_id/suggested"
 
+    # 停止对话
+    DIFY_REST_STOP = "/v1/chat-messages/:task_id/stop"
+
     @classmethod
     def _get_env(cls, name):
         value = os.getenv(name)

@@ -5,7 +5,7 @@
 /**
  * Event Stream 调用大模型接口 Ollama3 (Fetch 调用)
  */
-export async function createOllama3Stylized(text, qa_type, uuid) {
+export async function createOllama3Stylized(text, qa_type, uuid,chat_id) {
   const userStore = useUserStore()
   const token = userStore.getUserToken()
   const businessStore = useBusinessStore()
@@ -16,8 +16,8 @@ export async function createOllama3Stylized(text, qa_type, uuid) {
   })
 
   // 文件问答传文件url
-  if (text.includes('总结归纳文档的关键信息')) {
-    text = `${businessStore.$state.file_url}|总结归纳文档的关键信息`
+  if (text.includes('表格数据')) {
+    text = `${businessStore.$state.file_url}|${text}`
   } else if (qa_type === 'FILEDATA_QA') {
     // 表格问答默认带上文件url/key
     text = `${businessStore.$state.file_url}|${text}`
@@ -33,7 +33,8 @@ export async function createOllama3Stylized(text, qa_type, uuid) {
     body: JSON.stringify({
       query: text,
       qa_type,
-      chat_id: uuid,
+      uuid:uuid,
+      chat_id: chat_id,
     }),
   })
   return fetch(req)
@@ -67,7 +68,7 @@ export async function login(username, password) {
  * @param limit
  * @returns
  */
-export async function query_user_qa_record(page, limit, search_text) {
+export async function query_user_qa_record(page, limit, search_text,chat_id) {
   const userStore = useUserStore()
   const token = userStore.getUserToken()
   const url = new URL(`${location.origin}/sanic/user/query_user_record`)
@@ -82,6 +83,7 @@ export async function query_user_qa_record(page, limit, search_text) {
       page,
       limit,
       search_text,
+      chat_id
     }),
   })
   return fetch(req)
@@ -272,6 +274,32 @@ export async function abstract_doc_func(doc_id) {
     },
     body: JSON.stringify({
       doc_id,
+    }),
+  })
+  return fetch(req)
+}
+
+/**
+ * 停止对话
+ * @param task_id
+ * @param qa_type
+ * @param rating
+ * @returns
+ */
+export async function stop_chat(task_id, qa_type) {
+  const userStore = useUserStore()
+  const token = userStore.getUserToken()
+  const url = new URL(`${location.origin}/sanic/dify/stop_chat`)
+  const req = new Request(url, {
+    mode: 'cors',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`, // 添加 token 到头部
+    },
+    body: JSON.stringify({
+      task_id,
+      qa_type,
     }),
   })
   return fetch(req)
