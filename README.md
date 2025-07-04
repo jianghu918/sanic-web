@@ -30,7 +30,9 @@
 
 #### 🎬 **写作功能演示**
 
-https://github.com/user-attachments/assets/b3d1d36a-a6ba-4731-b744-6da40f779053
+
+https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
+
 
 
 |             微信             |
