@@ -779,14 +779,18 @@ const onChartCompletedReader = function () {
   /* 添加图片样式，约束宽度 */
 
   img {
-    height: auto;
-    display: block; // 将图片转为块级元素
-    margin-left: auto; // 左外边距自动
-    margin-right: auto; // 右外边距自动
-    max-width: 100%; // 最大宽度为容器宽度
-    // height: auto; // 高度自适应
+    // height: auto;
+    // display: block; // 将图片转为块级元素
+    // margin-left: auto; // 左外边距自动
+    // margin-right: auto; // 右外边距自动
+    // max-width: 100%; // 最大宽度为容器宽度
+    // // height: auto; // 高度自适应
 
-    max-height: 500px;
+    width: 95%; // 设置宽度为视口宽度
+    height: auto; // 设置高度为视口高度
+    object-fit: cover; // 保持图片比例，覆盖整个容器，可能会裁剪部分图片
+    display: block;
+    margin: 0; // 移除外边距
   }
 
   .active-tab {
